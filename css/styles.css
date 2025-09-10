@@ -1,0 +1,50 @@
+/* styles.css */
+:root{
+--accent: #2b7a78;
+--muted: #6b7280;
+--bg: #fbfcfe;
+--container: 1000px;
+--radius: 8px;
+}
+
+
+*{box-sizing:border-box}
+body{margin:0;font-family:'Roboto',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:#0f172a}
+.container{max-width:var(--container);margin:0 auto;padding:18px}
+
+
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 0; background-color: #0f172a;}
+.logo{font-weight:700}
+nav a{margin-left:14px;color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--accent)}
+
+
+.hero{display:flex;gap:20px;align-items:center;padding:18px 0}
+.hero .text{flex:1}
+.hero img{width:48%;border-radius:var(--radius);object-fit:cover}
+
+
+.section{padding:16px 0}
+h1,h2{margin:0 0 8px 0}
+p{margin:0 0 12px 0;color:var(--muted)}
+
+
+.gallery{display:flex;gap:12px}
+.gallery img{width:100%;max-width:48%;border-radius:var(--radius);object-fit:cover}
+
+
+.table-contacts{width:100%;border-collapse:collapse;margin-top:10px}
+.table-contacts th,.table-contacts td{padding:10px;border:1px solid #e8edf0;text-align:left}
+.table-contacts th{background:#f1f6f6}
+
+
+footer{border-top:1px solid #eceff3;padding:16px 0;color:var(--muted);font-size:14px;background-color: #0f172a;}
+
+
+@media (max-width:700px){
+.hero{flex-direction:column}
+.hero img{width:100%}
+.gallery{flex-direction:column}
+.gallery img{max-width:100%}
+nav a{display:none}
+}
