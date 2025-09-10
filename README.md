@@ -1,2 +1,1 @@
 # WebTechno_Polytech
-Привет
