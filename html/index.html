@@ -1,88 +1,105 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pinterest enjoyer — Главная</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pinterest enjoyer — Главная</title>
 
-
-  
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-
-
-    <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 
+  <header class="container">
+    <div class="logo">Pinterest enjoyer</div>
+    <nav aria-label="Главная навигация">
+      <a href="#about">О нас</a>
+      <a href="#gallery">Галерея</a>
+      <a href="#contact">Контакты</a>
+      <a href="auth.html">Вход</a>
+    </nav>
+  </header>
 
-    <header class="container">
-        <div class="logo">Pinterest enjoyer</div>
-        <nav aria-label="Главная навигация">
-            <a href="#about">О нас</a>
-            <a href="#gallery">Галерея</a>
-            <a href="#contact">Контакты</a>
-        </nav>
-    </header>
+  <main class="container">
 
+    <section id="about" class="section hero">
+      <div class="text">
+        <h1>Мы публикуем красивые изображения</h1>
+        <p>Небольшой проект, созданный для публикации интересных фотографий из Pinterest</p>
+      </div>
+      <img src="../src/Kaká x Van Gogh🖼✨️.jpg" alt="Картинка">
+    </section>
 
-    <main class="container">
+    <section id="gallery" class="section">
+      <h2>Галерея</h2>
+      <div class="gallery" aria-label="Небольшая галерея">
+        <img src="../src/messi starry night.jpg" alt="Картинка 1">
+        <img src="../src/messiiiii 💙❤️.jpg" alt="Картинка 2">
+      </div>
+    </section>
 
+    <section id="contact" class="section">
+      <h2>Контакты</h2>
+      <p>Контакты автора для подрержки</p>
 
+      <table class="table-contacts" aria-label="Таблица контактов">
+        <thead>
+          <tr>
+            <th>Тип</th>
+            <th>Информация</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>   
+            <td>Адрес</td>
+            <td>ул. Примерная, д.10, Москва</td>
+          </tr>
+          <tr>
+            <td>Телефон</td>
+            <td><a href="tel:+74951234567">+7 (495) 123-45-67</a></td>
+          </tr>
+          <tr>
+            <td>E-mail</td>
+            <td><a href="mailto:pinterestenjoyer@mail.ru">pinterestenjoyer@mail.ru</a></td>
+          </tr>
+        </tbody>
+      </table>
 
-        <section id="about" class="section hero">
-            <div class="text">
-                <h1>Мы публикуем красивые изображения</h1>
-                <p>Небольшой проект, созданный для публикации интересных фотографий из Pinterest</p>
-            </div>
-            <img src="../src/Kaká x Van Gogh🖼✨️.jpg" alt="Картинка">
-        </section>
+      <h3>Форма обратной связи</h3>
+      <form action="https://httpbin.org/post" method="post" enctype="multipart/form-data" class="feedback-form">
+        <label>ФИО: <input type="text" name="fio" required></label>
+        <label>Email: <input type="email" name="email" required></label>
 
+        <fieldset>
+          <legend>Откуда узнали о нас:</legend>
+          <label><input type="radio" name="source" value="друзья" required> От друзей</label>
+          <label><input type="radio" name="source" value="поиск"> Поиск</label>
+          <label><input type="radio" name="source" value="соцсети"> Соцсети</label>
+        </fieldset>
 
-        <section id="gallery" class="section">
-            <h2>Галерея</h2>
-            <div class="gallery" aria-label="Небольшая галерея">
-                <img src="../src/messi starry night.jpg" alt="Картинка 1">
-                <img src="../src/messiiiii 💙❤️.jpg" alt="Картинка 2">
-            </div>
-        </section>
+        <label>Тип обращения:
+          <select name="type">
+            <option value="жалоба">Жалоба</option>
+            <option value="предложение">Предложение</option>
+          </select>
+        </label>
 
+        <label>Сообщение:
+          <textarea name="message" rows="5" required></textarea>
+        </label>
 
+        <label>Вложения: <input type="file" name="file"></label>
 
-        <section id="contact" class="section">
-            <h2>Контакты</h2>
-            <p>Контакты автора для подрержки</p>
+        <label><input type="checkbox" name="consent" required> Даю согласие на обработку персональных данных</label>
 
+        <button type="submit">Отправить</button>
+      </form>
+    </section>
 
-            <table class="table-contacts" aria-label="Таблица контактов">
-                <thead>
-                    <tr>
-                        <th>Тип</th>
-                        <th>Информация</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>   
-                        <td>Адрес</td>
-                        <td>ул. Примерная, д.10, Москва</td>
-                    </tr>
-                    <tr>
-                        <td>Телефон</td>
-                        <td><a href="tel:+74951234567">+7 (495) 123-45-67</a></td>
-                    </tr>
-                    <tr>
-                        <td>E‑mail</td>
-                        <td><a href="mailto:pinterestenjoyer@mail.ru">pinterestenjoyer@mail.ru</a></td>
-                    </tr>
+  </main>
 
-                </tbody>
-            </table>
-        </section>
-
-
-    </main>
-
-
-    <footer class="container">
-        <div>© 2025 Pinterest enjoyer — Все права защищены</div>
-    </footer>
+  <footer class="container">
+    <div>© 2025 Pinterest enjoyer — Все права защищены</div>
+  </footer>
+</body>
 </html>

@@ -48,3 +48,38 @@ footer{border-top:1px solid #eceff3;padding:16px 0;color:var(--muted);font-size:
 .gallery img{max-width:100%}
 nav a{display:none}
 }
+
+/* Форма обратной связи */
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: var(--radius);
+  background: #f9f9f9;
+}
+
+.feedback-form input,
+.feedback-form textarea,
+.feedback-form select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  font-family: inherit;
+}
+
+.feedback-form button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: bold;
+}
+.feedback-form button:hover {
+  background: #1d5957;
+}
