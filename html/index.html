@@ -9,97 +9,155 @@
   <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-
-  <header class="container">
-    <div class="logo">Pinterest enjoyer</div>
-    <nav aria-label="Главная навигация">
-      <a href="#about">О нас</a>
-      <a href="#gallery">Галерея</a>
-      <a href="#contact">Контакты</a>
-      <a href="auth.html">Вход</a>
-    </nav>
-  </header>
-
-  <main class="container">
-
-    <section id="about" class="section hero">
-      <div class="text">
-        <h1>Мы публикуем красивые изображения</h1>
-        <p>Небольшой проект, созданный для публикации интересных фотографий из Pinterest</p>
+  <div class="layout-container">
+    <!-- Сайдбар -->
+    <aside class="sidebar">
+      <div class="logo">Pinterest enjoyer</div>
+      <nav class="main-nav" aria-label="Главная навигация">
+        <a href="index.html" class="nav-item active">Главная</a>
+        <a href="football.html" class="nav-item">Футбол</a>
+        <a href="boxing.html" class="nav-item">Бокс</a>
+        <a href="#about" class="nav-item">О нас</a>
+        <a href="#gallery" class="nav-item">Галерея</a>
+        <a href="#contact" class="nav-item">Контакты</a>
+        <a href="auth.html" class="nav-item">Вход</a>
+      </nav>
+      <div class="sidebar-footer">
+        <p>© 2025 Pinterest enjoyer</p>
       </div>
-      <img src="../src/Kaká x Van Gogh🖼✨️.jpg" alt="Картинка">
-    </section>
+    </aside>
 
-    <section id="gallery" class="section">
-      <h2>Галерея</h2>
-      <div class="gallery" aria-label="Небольшая галерея">
-        <img src="../src/messi starry night.jpg" alt="Картинка 1">
-        <img src="../src/messiiiii 💙❤️.jpg" alt="Картинка 2">
-      </div>
-    </section>
+    <!-- Основное содержимое -->
+    <main class="main-content">
+      <header class="content-header">
+        <h1>Добро пожаловать в мир красивых изображений</h1>
+      </header>
 
-    <section id="contact" class="section">
-      <h2>Контакты</h2>
-      <p>Контакты автора для подрержки</p>
+      <section id="about" class="section hero">
+        <div class="text-content">
+          <h2>Мы публикуем красивые изображения</h2>
+          <p>Небольшой проект, созданный для публикации интересных фотографий из Pinterest. Мы собираем лучшие работы со всего мира.</p>
+        </div>
+        <div class="image-content">
+          <img src="../src/Kaká x Van Gogh🖼✨️.jpg" alt="Картина Кака и Ван Гог">
+        </div>
+      </section>
 
-      <table class="table-contacts" aria-label="Таблица контактов">
-        <thead>
-          <tr>
-            <th>Тип</th>
-            <th>Информация</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>   
-            <td>Адрес</td>
-            <td>ул. Примерная, д.10, Москва</td>
-          </tr>
-          <tr>
-            <td>Телефон</td>
-            <td><a href="tel:+74951234567">+7 (495) 123-45-67</a></td>
-          </tr>
-          <tr>
-            <td>E-mail</td>
-            <td><a href="mailto:pinterestenjoyer@mail.ru">pinterestenjoyer@mail.ru</a></td>
-          </tr>
-        </tbody>
-      </table>
+      <section id="gallery" class="section">
+        <h2>Популярные изображения</h2>
+        <div class="gallery-grid">
+          <div class="gallery-item">
+            <img src="../src/messi starry night.jpg" alt="Месси в стиле Звёздной ночи">
+            <div class="gallery-caption">Месси в стиле Ван Гога</div>
+          </div>
+          <div class="gallery-item">
+            <img src="../src/messiiiii 💙❤️.jpg" alt="Арт с Месси">
+            <div class="gallery-caption">Артистичный Месси</div>
+          </div>
+          <div class="gallery-item">
+            <img src="../src/football.jpg" alt="Футбольное искусство">
+            <div class="gallery-caption">Футбольное искусство</div>
+          </div>
+          <div class="gallery-item">
+            <img src="../src/boxing.jpg" alt="Боксёрское искусство">
+            <div class="gallery-caption">Боксёрская мощь</div>
+          </div>
+        </div>
+      </section>
 
-      <h3>Форма обратной связи</h3>
-      <form action="https://httpbin.org/post" method="post" enctype="multipart/form-data" class="feedback-form">
-        <label>ФИО: <input type="text" name="fio" required></label>
-        <label>Email: <input type="email" name="email" required></label>
+      <section class="categories-preview">
+        <h2>Наши категории</h2>
+        <div class="categories-grid">
+          <a href="football.html" class="category-card">
+            <img src="../src/football2.jpg" alt="Футбол">
+            <h3>Футбол</h3>
+            <p>Лучшие футбольные моменты в художественном стиле</p>
+          </a>
+          <a href="boxing.html" class="category-card">
+            <img src="../src/boxing2.png" alt="Бокс">
+            <h3>Бокс</h3>
+            <p>Мощь и грация боксёрских поединков</p>
+          </a>
+        </div>
+      </section>
 
-        <fieldset>
-          <legend>Откуда узнали о нас:</legend>
-          <label><input type="radio" name="source" value="друзья" required> От друзей</label>
-          <label><input type="radio" name="source" value="поиск"> Поиск</label>
-          <label><input type="radio" name="source" value="соцсети"> Соцсети</label>
-        </fieldset>
+      <section id="contact" class="section">
+        <h2>Контакты</h2>
+        <p>Свяжитесь с нами для сотрудничества или поддержки</p>
 
-        <label>Тип обращения:
-          <select name="type">
-            <option value="жалоба">Жалоба</option>
-            <option value="предложение">Предложение</option>
-          </select>
-        </label>
+        <div class="contact-content">
+          <div class="contact-info">
+            <table class="table-contacts" aria-label="Таблица контактов">
+              <thead>
+                <tr>
+                  <th>Тип</th>
+                  <th>Информация</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>   
+                  <td>Адрес</td>
+                  <td>ул. Примерная, д.10, Москва</td>
+                </tr>
+                <tr>
+                  <td>Телефон</td>
+                  <td><a href="tel:+74951234567">+7 (495) 123-45-67</a></td>
+                </tr>
+                <tr>
+                  <td>E-mail</td>
+                  <td><a href="mailto:pinterestenjoyer@mail.ru">pinterestenjoyer@mail.ru</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-        <label>Сообщение:
-          <textarea name="message" rows="5" required></textarea>
-        </label>
+          <div class="contact-form">
+            <h3>Форма обратной связи</h3>
+            <form action="https://httpbin.org/post" method="post" enctype="multipart/form-data" class="feedback-form">
+              <div class="form-row">
+                <label>ФИО: <input type="text" name="fio" required></label>
+                <label>Email: <input type="email" name="email" required></label>
+              </div>
 
-        <label>Вложения: <input type="file" name="file"></label>
+              <fieldset>
+                <legend>Откуда узнали о нас:</legend>
+                <div class="radio-group">
+                  <label><input type="radio" name="source" value="друзья" required> От друзей</label>
+                  <label><input type="radio" name="source" value="поиск"> Поиск</label>
+                  <label><input type="radio" name="source" value="соцсети"> Соцсети</label>
+                </div>
+              </fieldset>
 
-        <label><input type="checkbox" name="consent" required> Даю согласие на обработку персональных данных</label>
+              <label>Тип обращения:
+                <select name="type">
+                  <option value="жалоба">Жалоба</option>
+                  <option value="предложение">Предложение</option>
+                </select>
+              </label>
 
-        <button type="submit">Отправить</button>
-      </form>
-    </section>
+              <label>Сообщение:
+                <textarea name="message" rows="5" required></textarea>
+              </label>
 
-  </main>
+              <label>Вложения: <input type="file" name="file"></label>
 
-  <footer class="container">
-    <div>© 2025 Pinterest enjoyer — Все права защищены</div>
+              <label class="checkbox-label">
+                <input type="checkbox" name="consent" required> 
+                Даю согласие на обработку персональных данных
+              </label>
+
+              <button type="submit">Отправить</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="main-footer">
+    <div class="container">
+      <p>© 2025 Pinterest enjoyer — Все права защищены</p>
+    </div>
   </footer>
 </body>
 </html>
