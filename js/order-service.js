@@ -1,43 +1,13 @@
-// order-services.js
 document.addEventListener('DOMContentLoaded', function() {
-    // Сортируем услуги в алфавитном порядке
+    createFilters();
     const sortedServices = services.sort((a, b) => a.name.localeCompare(b.name));
-    
-    // Находим контейнер для услуг
     const servicesContainer = document.getElementById('services-container');
     
-    // Создаем карточки для каждой услуги
     sortedServices.forEach(service => {
-        const serviceCard = document.createElement('div');
-        serviceCard.className = 'service-card';
-        serviceCard.dataset.service = service.keyword;
-        serviceCard.dataset.category = service.category;
-        
-        serviceCard.innerHTML = `
-            <div class="service-image">
-                ${service.image}
-            </div>
-            <div class="service-info">
-                <h3>${service.name}</h3>
-                <p>${service.description}</p>
-                <p class="price">${service.price}Р</p>
-                <button class="add-to-order">Добавить</button>
-            </div>
-        `;
-        
+        const serviceCard = createServiceCard(service);
         servicesContainer.appendChild(serviceCard);
     });
     
-    // Добавляем обработчики событий для кнопок "Добавить"
-    document.querySelectorAll('.add-to-order').forEach(button => {
-        button.addEventListener('click', function() {
-            const serviceCard = this.closest('.service-card');
-            const serviceKeyword = serviceCard.dataset.service;
-            addToOrder(serviceKeyword);
-        });
-    });
-    
-    // Обработчик отправки формы
     document.getElementById('customer-form').addEventListener('submit', function(e) {
         e.preventDefault();
         alert('Заказ успешно оформлен! С вами свяжутся для подтверждения.');
@@ -46,32 +16,206 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+function createServiceCard(service) {
+    const serviceCard = document.createElement('div');
+    serviceCard.className = 'service-card';
+    serviceCard.dataset.service = service.keyword;
+    serviceCard.dataset.category = service.category;
+    serviceCard.dataset.kind = service.kind;
+    
+    serviceCard.innerHTML = `
+        <div class="service-image">
+            ${service.image}
+        </div>
+        <div class="service-info">
+            <h3>${service.name}</h3>
+            <p>${service.description}</p>
+            <p class="price">${service.price}Р</p>
+            <button class="add-to-order">Добавить</button>
+        </div>
+    `;
+    
+    serviceCard.querySelector('.add-to-order').addEventListener('click', function() {
+        addToOrder(service.keyword);
+    });
+    
+    return serviceCard;
+}
+
+function createFilters() {
+    const categories = {
+        'all': 'Все услуги',
+        'clothing': 'Одежда',
+        'accessories': 'Аксессуары',
+        'headwear': 'Головные уборы',
+        'premium': 'Премиум',
+        'polygraphy': 'Полиграфия',
+        'souvenirs': 'Сувениры'
+    };
+    
+    const servicesSection = document.getElementById('services');
+    const mainFilterContainer = document.createElement('div');
+    mainFilterContainer.className = 'main-filters-container';
+    
+    const mainFilterTitle = document.createElement('h3');
+    mainFilterTitle.textContent = 'Категории услуг:';
+    mainFilterContainer.appendChild(mainFilterTitle);
+    
+    const mainFilters = document.createElement('div');
+    mainFilters.className = 'main-filters';
+    
+    const allCategoriesButton = document.createElement('button');
+    allCategoriesButton.className = 'main-filter-btn active';
+    allCategoriesButton.dataset.category = 'all';
+    allCategoriesButton.textContent = 'Все услуги';
+    allCategoriesButton.addEventListener('click', filterByCategory);
+    mainFilters.appendChild(allCategoriesButton);
+    
+    for (const category in categories) {
+        if (category !== 'all') {
+            const categoryButton = document.createElement('button');
+            categoryButton.className = 'main-filter-btn';
+            categoryButton.dataset.category = category;
+            categoryButton.textContent = categories[category];
+            categoryButton.addEventListener('click', filterByCategory);
+            mainFilters.appendChild(categoryButton);
+        }
+    }
+    
+    mainFilterContainer.appendChild(mainFilters);
+    servicesSection.insertBefore(mainFilterContainer, document.getElementById('services-container'));
+    
+    const subFiltersContainer = document.createElement('div');
+    subFiltersContainer.className = 'subfilters-container';
+    subFiltersContainer.id = 'subfilters-container';
+    subFiltersContainer.style.display = 'none';
+    servicesSection.insertBefore(subFiltersContainer, document.getElementById('services-container'));
+}
+
+function filterByCategory() {
+    const category = this.dataset.category;
+    
+    document.querySelectorAll('.main-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    this.classList.add('active');
+    
+    document.querySelectorAll('.service-card').forEach(card => {
+        if (category === 'all' || card.dataset.category === category) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    const subFiltersContainer = document.getElementById('subfilters-container');
+    if (category !== 'all') {
+        createSubFilters(category);
+        subFiltersContainer.style.display = 'block';
+    } else {
+        subFiltersContainer.style.display = 'none';
+    }
+}
+
+function createSubFilters(category) {
+    const kindFilters = {
+        'clothing': ['all', 'basic', 'premium'],
+        'accessories': ['all', 'basic', 'premium'],
+        'headwear': ['all', 'basic', 'premium'],
+        'premium': ['all', 'exclusive', 'custom', 'luxury'],
+        'polygraphy': ['all', 'paper', 'large_format', 'vinyl'],
+        'souvenirs': ['all', 'metal', 'magnetic', 'cork', 'cardboard', 'plastic', 'leather']
+    };
+    
+    const kindNames = {
+        'all': 'Все',
+        'basic': 'Базовый',
+        'premium': 'Премиум',
+        'exclusive': 'Эксклюзив',
+        'custom': 'Индивидуальный',
+        'luxury': 'Люкс',
+        'paper': 'Бумага',
+        'large_format': 'Крупный формат',
+        'vinyl': 'Винил',
+        'metal': 'Металл',
+        'magnetic': 'Магнитный',
+        'cork': 'Пробка',
+        'cardboard': 'Картон',
+        'plastic': 'Пластик',
+        'leather': 'Кожа'
+    };
+    
+    const subFiltersContainer = document.getElementById('subfilters-container');
+    subFiltersContainer.innerHTML = '';
+    
+    const subFilterTitle = document.createElement('h4');
+    subFilterTitle.textContent = 'Тип:';
+    subFiltersContainer.appendChild(subFilterTitle);
+    
+    const subFilters = document.createElement('div');
+    subFilters.className = 'sub-filters';
+    
+    if (kindFilters[category]) {
+        kindFilters[category].forEach(kind => {
+            const kindButton = document.createElement('button');
+            kindButton.className = 'sub-filter-btn';
+            kindButton.dataset.kind = kind;
+            kindButton.dataset.category = category;
+            kindButton.textContent = kindNames[kind] || kind;
+            kindButton.addEventListener('click', filterByKind);
+            subFilters.appendChild(kindButton);
+        });
+    }
+    
+    subFiltersContainer.appendChild(subFilters);
+    subFilters.querySelector('.sub-filter-btn[data-kind="all"]').classList.add('active');
+}
+
+function filterByKind() {
+    const kind = this.dataset.kind;
+    const category = this.dataset.category;
+    
+    document.querySelectorAll(`.sub-filter-btn[data-category="${category}"]`).forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    this.classList.add('active');
+    
+    document.querySelectorAll(`.service-card[data-category="${category}"]`).forEach(card => {
+        if (kind === 'all' || card.dataset.kind === kind) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
 let selectedServices = {
     clothing: null,
     accessories: null,
     headwear: null,
-    premium: null
+    premium: null,
+    polygraphy: null,
+    souvenirs: null
 };
 
 function addToOrder(serviceKeyword) {
-    // Находим услугу по ключевому слову
     const service = services.find(s => s.keyword === serviceKeyword);
     
     if (!service) return;
     
-    // Сбрасываем выделение всех карточек в этой категории
     const categoryCards = document.querySelectorAll(`.service-card[data-category="${service.category}"]`);
     categoryCards.forEach(card => {
         card.classList.remove('selected');
     });
     
-    // Выделяем выбранную карточку
-    document.querySelector(`.service-card[data-service="${serviceKeyword}"]`).classList.add('selected');
+    const selectedCard = document.querySelector(`.service-card[data-service="${serviceKeyword}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+    }
     
-    // Сохраняем выбранную услугу
     selectedServices[service.category] = service;
-    
-    // Обновляем отображение заказа
     updateOrderDisplay();
 }
 
@@ -81,7 +225,6 @@ function updateOrderDisplay() {
     let total = 0;
     let hasSelection = false;
     
-    // Проверяем, есть ли выбранные услуги
     for (const category in selectedServices) {
         if (selectedServices[category]) {
             hasSelection = true;
@@ -95,7 +238,6 @@ function updateOrderDisplay() {
         return;
     }
     
-    // Формируем список только выбранных услуг
     let orderHTML = '';
     
     for (const category in selectedServices) {
@@ -116,7 +258,6 @@ function updateOrderDisplay() {
     
     orderContainer.innerHTML = orderHTML;
     
-    // Добавляем обработчики событий для кнопок удаления
     document.querySelectorAll('.remove-item').forEach(button => {
         button.addEventListener('click', function() {
             const category = this.dataset.category;
@@ -124,7 +265,6 @@ function updateOrderDisplay() {
         });
     });
     
-    // Обновляем итоговую стоимость
     document.getElementById('total-price').textContent = `${total}Р`;
     orderTotal.style.display = 'block';
 }
@@ -134,7 +274,9 @@ function getCategoryName(category) {
         clothing: 'Одежда',
         accessories: 'Аксессуары',
         headwear: 'Головные уборы',
-        premium: 'Премиум'
+        premium: 'Премиум',
+        polygraphy: 'Полиграфия',
+        souvenirs: 'Сувениры'
     };
     
     return categoryNames[category] || category;
@@ -143,26 +285,21 @@ function getCategoryName(category) {
 function removeFromOrder(category) {
     selectedServices[category] = null;
     
-    // Сбрасываем выделение карточек в этой категории
     document.querySelectorAll(`.service-card[data-category="${category}"]`).forEach(card => {
         card.classList.remove('selected');
     });
     
-    // Обновляем отображение заказа
     updateOrderDisplay();
 }
 
 function resetOrder() {
-    // Сбрасываем выбранные услуги
     for (const category in selectedServices) {
         selectedServices[category] = null;
     }
     
-    // Сбрасываем выделение карточек
     document.querySelectorAll('.service-card').forEach(card => {
         card.classList.remove('selected');
     });
     
-    // Обновляем отображение заказа
     updateOrderDisplay();
 }
