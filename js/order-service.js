@@ -8,13 +8,163 @@ document.addEventListener('DOMContentLoaded', function() {
         servicesContainer.appendChild(serviceCard);
     });
     
+    document.querySelectorAll('.combo-add-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const comboType = this.dataset.combo;
+            addComboToOrder(comboType);
+        });
+    });
+    
     document.getElementById('customer-form').addEventListener('submit', function(e) {
-        e.preventDefault();
+        if (!validateComboSelection()) {
+            e.preventDefault();
+            return false;
+        }
         alert('Заказ успешно оформлен! С вами свяжутся для подтверждения.');
         this.reset();
         resetOrder();
     });
+    
+    document.getElementById('notification-ok').addEventListener('click', function() {
+        document.getElementById('notification').classList.add('hidden');
+    });
 });
+
+// Изменяем структуру selectedServices на массив
+let selectedServices = [];
+
+function addComboToOrder(comboType) {
+    const comboDefinitions = {
+        'basic': ['tshirt_print', 'mug_print'],
+        'business': ['business_cards', 'flyers', 'pen_print'],
+        'premium': ['branded_merch', 'limited_edition', 'premium_packaging']
+    };
+    
+    const selectedCombo = comboDefinitions[comboType];
+    
+    if (selectedCombo) {
+        // Проверяем, не добавлены ли уже услуги из этого комбо
+        const currentKeywords = selectedServices.map(service => service.keyword);
+        
+        const alreadyAdded = selectedCombo.some(keyword => currentKeywords.includes(keyword));
+        
+        if (alreadyAdded) {
+            showNotification('Некоторые услуги из этого набора уже есть в заказе. Пожалуйста, очистите корзину перед добавлением нового комбо.', 'warning');
+            return;
+        }
+        
+        // Добавляем все услуги комбо
+        selectedCombo.forEach(serviceKeyword => {
+            addToOrder(serviceKeyword);
+        });
+        
+        showNotification(`Комбо-набор "${getComboName(comboType)}" добавлен в заказ!`, 'success');
+    }
+}
+
+function getComboName(comboType) {
+    const comboNames = {
+        'basic': 'Базовый набор',
+        'business': 'Бизнес набор', 
+        'premium': 'Премиум набор'
+    };
+    return comboNames[comboType] || comboType;
+}
+
+function validateComboSelection() {
+    if (selectedServices.length === 0) {
+        showNotification('Пожалуйста, выберите хотя бы одну услугу для оформления заказа.', 'error');
+        return false;
+    }
+    
+    const comboDefinitions = {
+        'basic': ['tshirt_print', 'mug_print'],
+        'business': ['business_cards', 'flyers', 'pen_print'],
+        'premium': ['branded_merch', 'limited_edition', 'premium_packaging']
+    };
+    
+    const selectedKeywords = selectedServices.map(service => service.keyword);
+    
+    let isValidCombo = false;
+    let matchedCombo = '';
+    
+    // Проверяем, соответствует ли заказ одному из комбо-наборов
+    for (const [comboName, requiredKeywords] of Object.entries(comboDefinitions)) {
+        const hasAllRequired = requiredKeywords.every(keyword => selectedKeywords.includes(keyword));
+        const hasOnlyRequired = selectedKeywords.every(keyword => requiredKeywords.includes(keyword));
+        
+        if (hasAllRequired && hasOnlyRequired) {
+            isValidCombo = true;
+            matchedCombo = comboName;
+            break;
+        }
+    }
+    
+    // Если заказ не соответствует ни одному комбо, проверяем частичные совпадения
+    if (!isValidCombo) {
+        let bestMatch = null;
+        let bestMatchMissing = [];
+        
+        for (const [comboName, requiredKeywords] of Object.entries(comboDefinitions)) {
+            const missing = requiredKeywords.filter(keyword => !selectedKeywords.includes(keyword));
+            const extra = selectedKeywords.filter(keyword => !requiredKeywords.includes(keyword));
+            
+            // Ищем наиболее подходящий комбо (с наименьшим количеством недостающих услуг)
+            if (bestMatch === null || missing.length < bestMatchMissing.length) {
+                bestMatch = comboName;
+                bestMatchMissing = missing;
+            }
+        }
+        
+        if (bestMatchMissing.length > 0) {
+            const missingItems = bestMatchMissing.map(keyword => {
+                const service = services.find(s => s.keyword === keyword);
+                return service ? service.name : keyword;
+            });
+            
+            const message = `Для завершения набора "${getComboName(bestMatch)}" добавьте: ${missingItems.join(', ')}`;
+            showNotification(message, 'warning');
+            return false;
+        }
+    }
+    
+    if (!isValidCombo) {
+        showNotification('Выбранные услуги не образуют полный набор. Пожалуйста, выберите один из готовых комбо-наборов.', 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+function showNotification(message, type = 'error') {
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notification-message');
+    const notificationIcon = document.querySelector('.notification-icon');
+    const notificationTitle = document.querySelector('.notification-title');
+    
+    notification.className = `notification ${type}`;
+    
+    switch(type) {
+        case 'success':
+            notificationIcon.textContent = '✅';
+            notificationTitle.textContent = 'Успешно!';
+            break;
+        case 'warning':
+            notificationIcon.textContent = '⚠️';
+            notificationTitle.textContent = 'Внимание';
+            break;
+        case 'error':
+            notificationIcon.textContent = '❌';
+            notificationTitle.textContent = 'Ошибка';
+            break;
+        default:
+            notificationIcon.textContent = 'ℹ️';
+            notificationTitle.textContent = 'Информация';
+    }
+    
+    notificationMessage.textContent = message;
+    notification.classList.remove('hidden');
+}
 
 function createServiceCard(service) {
     const serviceCard = document.createElement('div');
@@ -191,31 +341,27 @@ function filterByKind() {
     });
 }
 
-let selectedServices = {
-    clothing: null,
-    accessories: null,
-    headwear: null,
-    premium: null,
-    polygraphy: null,
-    souvenirs: null
-};
-
 function addToOrder(serviceKeyword) {
     const service = services.find(s => s.keyword === serviceKeyword);
     
     if (!service) return;
     
-    const categoryCards = document.querySelectorAll(`.service-card[data-category="${service.category}"]`);
-    categoryCards.forEach(card => {
-        card.classList.remove('selected');
-    });
+    // Проверяем, не добавлена ли уже эта услуга
+    const alreadyAdded = selectedServices.some(s => s.keyword === serviceKeyword);
+    if (alreadyAdded) {
+        showNotification('Эта услуга уже добавлена в заказ.', 'warning');
+        return;
+    }
     
+    // Добавляем услугу в массив
+    selectedServices.push(service);
+    
+    // Выделяем карточку
     const selectedCard = document.querySelector(`.service-card[data-service="${serviceKeyword}"]`);
     if (selectedCard) {
         selectedCard.classList.add('selected');
     }
     
-    selectedServices[service.category] = service;
     updateOrderDisplay();
 }
 
@@ -223,16 +369,8 @@ function updateOrderDisplay() {
     const orderContainer = document.getElementById('order-items');
     const orderTotal = document.getElementById('order-total');
     let total = 0;
-    let hasSelection = false;
     
-    for (const category in selectedServices) {
-        if (selectedServices[category]) {
-            hasSelection = true;
-            break;
-        }
-    }
-    
-    if (!hasSelection) {
+    if (selectedServices.length === 0) {
         orderContainer.innerHTML = '<p>Ничего не выбрано</p>';
         orderTotal.style.display = 'none';
         return;
@@ -240,28 +378,40 @@ function updateOrderDisplay() {
     
     let orderHTML = '';
     
-    for (const category in selectedServices) {
-        const service = selectedServices[category];
-        if (service) {
+    // Группируем услуги по категориям для отображения
+    const servicesByCategory = {};
+    selectedServices.forEach(service => {
+        if (!servicesByCategory[service.category]) {
+            servicesByCategory[service.category] = [];
+        }
+        servicesByCategory[service.category].push(service);
+    });
+    
+    for (const category in servicesByCategory) {
+        orderHTML += `
+            <div class="order-category">
+                <h4>${getCategoryName(category)}</h4>
+        `;
+        
+        servicesByCategory[category].forEach(service => {
             orderHTML += `
-                <div class="order-category">
-                    <h4>${getCategoryName(category)}</h4>
-                    <div class="order-item">
-                        <span>${service.name} ${service.price}Р</span>
-                        <button class="remove-item" data-category="${category}">✕</button>
-                    </div>
+                <div class="order-item">
+                    <span>${service.name} ${service.price}Р</span>
+                    <button class="remove-item" data-service="${service.keyword}">✕</button>
                 </div>
             `;
             total += service.price;
-        }
+        });
+        
+        orderHTML += `</div>`;
     }
     
     orderContainer.innerHTML = orderHTML;
     
     document.querySelectorAll('.remove-item').forEach(button => {
         button.addEventListener('click', function() {
-            const category = this.dataset.category;
-            removeFromOrder(category);
+            const serviceKeyword = this.dataset.service;
+            removeFromOrder(serviceKeyword);
         });
     });
     
@@ -282,20 +432,21 @@ function getCategoryName(category) {
     return categoryNames[category] || category;
 }
 
-function removeFromOrder(category) {
-    selectedServices[category] = null;
+function removeFromOrder(serviceKeyword) {
+    // Удаляем услугу из массива
+    selectedServices = selectedServices.filter(service => service.keyword !== serviceKeyword);
     
-    document.querySelectorAll(`.service-card[data-category="${category}"]`).forEach(card => {
-        card.classList.remove('selected');
-    });
+    // Снимаем выделение с карточки
+    const selectedCard = document.querySelector(`.service-card[data-service="${serviceKeyword}"]`);
+    if (selectedCard) {
+        selectedCard.classList.remove('selected');
+    }
     
     updateOrderDisplay();
 }
 
 function resetOrder() {
-    for (const category in selectedServices) {
-        selectedServices[category] = null;
-    }
+    selectedServices = [];
     
     document.querySelectorAll('.service-card').forEach(card => {
         card.classList.remove('selected');

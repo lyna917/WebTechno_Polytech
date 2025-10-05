@@ -9,7 +9,6 @@
 </head>
 <body>
   <div class="layout-container">
-    <!-- Сайдбар -->
     <aside class="sidebar">
       <div class="logo">Pinterest enjoyer</div>
       <nav class="main-nav" aria-label="Главная навигация">
@@ -29,6 +28,92 @@
         <h1>Заказ услуг</h1>
         <p>Выберите услуги из нашего каталога и оформите заказ</p>
       </header>
+
+      <section id="combo" class="section">
+    <h2>Готовые комбо-наборы</h2>
+    <div class="combo-controls">
+        <button class="clear-cart-btn" onclick="resetOrder()">Очистить корзину</button>
+    </div>
+    <div class="combo-grid">
+        <div class="combo-item">
+            <h3>Базовый набор</h3>
+            <div class="combo-dishes">
+                <div class="dish">
+                    <div class="dish-image">👕</div>
+                    <div class="dish-caption">Футболка с принтом</div>
+                </div>
+                <div class="dish">
+                    <div class="dish-image">☕</div>
+                    <div class="dish-caption">Кружка с принтом</div>
+                </div>
+            </div>
+            <div class="combo-price">800Р</div>
+            <div class="combo-note">Экономьте 100Р при покупке набора</div>
+            <button class="combo-add-btn" data-combo="basic">Добавить набор</button>
+        </div>
+        
+        <div class="combo-item">
+            <h3>Бизнес набор</h3>
+            <div class="combo-dishes">
+                <div class="dish">
+                    <div class="dish-image">📇</div>
+                    <div class="dish-caption">Визитки</div>
+                </div>
+                <div class="dish">
+                    <div class="dish-image">📃</div>
+                    <div class="dish-caption">Флаеры</div>
+                </div>
+                <div class="dish">
+                    <div class="dish-image">🖊️</div>
+                    <div class="dish-caption">Ручки с лого</div>
+                </div>
+            </div>
+            <div class="combo-price">1200Р</div>
+            <div class="combo-note">Идеально для старта бизнеса</div>
+            <button class="combo-add-btn" data-combo="business">Добавить набор</button>
+        </div>
+        
+        <div class="combo-item">
+            <h3>Премиум набор</h3>
+            <div class="combo-dishes">
+                <div class="dish">
+                    <div class="dish-image">🎁</div>
+                    <div class="dish-caption">Фирменный мерч</div>
+                </div>
+                <div class="dish">
+                    <div class="dish-image">🏆</div>
+                    <div class="dish-caption">Лимитированная серия</div>
+                </div>
+                <div class="dish">
+                    <div class="dish-image">🎀</div>
+                    <div class="dish-caption">Премиальная упаковка</div>
+                </div>
+            </div>
+            <div class="combo-price">2500Р</div>
+            <div class="combo-note">Эксклюзивные товары для ценителей</div>
+            <button class="combo-add-btn" data-combo="premium">Добавить набор</button>
+        </div>
+    </div>
+    
+    <div class="desserts-info">
+        <h4>Дополнительные услуги</h4>
+        <p>Вы можете добавить любые дополнительные услуги к вашему заказу</p>
+        <div class="desserts-grid">
+            <div class="dessert-item">
+                <div class="dessert-image">📌</div>
+                <div class="dessert-caption">Значки</div>
+            </div>
+            <div class="dessert-item">
+                <div class="dessert-image">🧲</div>
+                <div class="dessert-caption">Магниты</div>
+            </div>
+            <div class="dessert-item">
+                <div class="dessert-image">🔖</div>
+                <div class="dessert-caption">Наклейки</div>
+            </div>
+        </div>
+    </div>
+</section>
 
       <section id="services" class="section">
         <h2>Наши услуги</h2>
@@ -98,6 +183,15 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <div id="notification" class="notification hidden">
+    <div class="notification-content">
+      <div class="notification-icon">⚠️</div>
+      <h3 class="notification-title">Неполный набор услуг</h3>
+      <p class="notification-message" id="notification-message"></p>
+      <button class="notification-button" id="notification-ok">Окей</button>
+    </div>
   </div>
 
   <footer class="main-footer">
