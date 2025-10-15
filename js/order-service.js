@@ -1,6 +1,44 @@
 // Замените объявление servicesData и инициализацию на:
 let servicesData = [];
 
+// Изменяем структуру selectedServices на массив
+let selectedServices = [];
+
+// Функция для загрузки корзины из localStorage
+function loadCartFromStorage() {
+    try {
+        const savedCart = localStorage.getItem('shoppingCart');
+        if (savedCart) {
+            const parsedCart = JSON.parse(savedCart);
+            selectedServices = parsedCart;
+            console.log('Корзина загружена из localStorage:', selectedServices);
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки корзины из localStorage:', error);
+        selectedServices = [];
+    }
+}
+
+// Функция для сохранения корзины в localStorage
+function saveCartToStorage() {
+    try {
+        localStorage.setItem('shoppingCart', JSON.stringify(selectedServices));
+        console.log('Корзина сохранена в localStorage:', selectedServices);
+    } catch (error) {
+        console.error('Ошибка сохранения корзины в localStorage:', error);
+    }
+}
+
+// Функция для очистки корзины в localStorage
+function clearCartFromStorage() {
+    try {
+        localStorage.removeItem('shoppingCart');
+        console.log('Корзина очищена из localStorage');
+    } catch (error) {
+        console.error('Ошибка очистки корзины из localStorage:', error);
+    }
+}
+
 // Если хотите использовать чистый JSON
 async function loadServicesData() {
     try {
@@ -161,6 +199,9 @@ function showErrorMessage() {
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM загружен, начинаем инициализацию...');
     
+    // Загружаем корзину из localStorage
+    loadCartFromStorage();
+    
     // Показываем индикатор загрузки
     showLoadingIndicator();
     
@@ -172,7 +213,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Создаем фильтры и рендерим услуги
         createFilters();
         renderFilteredServices();
-        console.log('Услуги отрендерены');
+        
+        // Обновляем отображение корзины после загрузки данных
+        updateOrderDisplay();
+        
+        console.log('Услуги отрендерены, корзина восстановлена');
     } else {
         // Показываем сообщение об ошибке
         showErrorMessage();
@@ -301,8 +346,12 @@ function createServiceCard(service) {
     // Получаем эмодзи для услуги
     const serviceEmoji = getServiceEmoji(service);
     
+    // Проверяем, выбрана ли уже эта услуга
+    const isSelected = selectedServices.some(s => s.id === service.id);
+    const selectedClass = isSelected ? 'selected' : '';
+    
     return `
-        <div class="service-card" data-service="${service.id}" data-category="${service.section}">
+        <div class="service-card ${selectedClass}" data-service="${service.id}" data-category="${service.section}">
             <div class="service-image">
                 ${serviceEmoji}
             </div>
@@ -310,7 +359,7 @@ function createServiceCard(service) {
                 <h3>${service.name}</h3>
                 <p>${service.description}</p>
                 <p class="price">${service.price}</p>
-                <button class="add-to-order" onclick="addToOrder('${service.id}')">Добавить</button>
+                <button class="add-to-order" onclick="addToOrder('${service.id}')">${isSelected ? 'Добавлено' : 'Добавить'}</button>
             </div>
         </div>
     `;
@@ -386,9 +435,6 @@ function resetFilters() {
     
     renderFilteredServices();
 }
-
-// Изменяем структуру selectedServices на массив
-let selectedServices = [];
 
 function addComboToOrder(comboType) {
     const comboDefinitions = {
@@ -697,10 +743,18 @@ function addToOrder(serviceId) {
     // Добавляем услугу в массив
     selectedServices.push(service);
     
+    // Сохраняем корзину в localStorage
+    saveCartToStorage();
+    
     // Выделяем карточку
     const selectedCard = document.querySelector(`.service-card[data-service="${serviceId}"]`);
     if (selectedCard) {
         selectedCard.classList.add('selected');
+        // Обновляем текст кнопки
+        const button = selectedCard.querySelector('.add-to-order');
+        if (button) {
+            button.textContent = 'Добавлено';
+        }
     }
     
     updateOrderDisplay();
@@ -782,10 +836,18 @@ function removeFromOrder(serviceId) {
     // Удаляем услугу из массива
     selectedServices = selectedServices.filter(service => service.id !== serviceId);
     
+    // Сохраняем корзину в localStorage
+    saveCartToStorage();
+    
     // Снимаем выделение с карточки
     const selectedCard = document.querySelector(`.service-card[data-service="${serviceId}"]`);
     if (selectedCard) {
         selectedCard.classList.remove('selected');
+        // Обновляем текст кнопки
+        const button = selectedCard.querySelector('.add-to-order');
+        if (button) {
+            button.textContent = 'Добавить';
+        }
     }
     
     updateOrderDisplay();
@@ -794,8 +856,16 @@ function removeFromOrder(serviceId) {
 function resetOrder() {
     selectedServices = [];
     
+    // Очищаем localStorage
+    clearCartFromStorage();
+    
     document.querySelectorAll('.service-card').forEach(card => {
         card.classList.remove('selected');
+        // Обновляем текст кнопки
+        const button = card.querySelector('.add-to-order');
+        if (button) {
+            button.textContent = 'Добавить';
+        }
     });
     
     updateOrderDisplay();
@@ -894,6 +964,8 @@ function submitFormDataJSON(formData, method, action) {
     .then(data => {
         showNotification('Заказ успешно отправлен!', 'success');
         console.log('Ответ сервера:', data);
+        
+        // Очищаем корзину после успешной отправки
         resetOrder();
     })
     .catch(error => {
@@ -905,6 +977,7 @@ function submitFormDataJSON(formData, method, action) {
         submitButton.disabled = false;
     });
 }
+
 // Функция для расчета общей стоимости (должна быть у вас уже в коде)
 function calculateTotalPrice() {
     return document.getElementById('total-price').textContent;
