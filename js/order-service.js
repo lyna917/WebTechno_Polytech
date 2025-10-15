@@ -52,11 +52,13 @@ async function loadServicesData() {
         
         // Добавляем эмодзи к загруженным данным, если их нет
         servicesData.forEach(section => {
-            section.services.forEach(service => {
-                if (!service.image) {
-                    service.image = getServiceEmoji(service);
-                }
-            });
+            if (section.services) {
+                section.services.forEach(service => {
+                    if (service && !service.image) {
+                        service.image = getServiceEmoji(service);
+                    }
+                });
+            }
         });
         
         console.log('Данные успешно загружены:', servicesData);
@@ -137,12 +139,12 @@ function getServiceEmoji(service) {
     };
     
     // Сопоставляем по ID услуги или названию
-    if (emojiMap[service.id]) {
+    if (service.id && emojiMap[service.id]) {
         return emojiMap[service.id];
     }
     
     // Ищем по ключевым словам в названии
-    const name = service.name.toLowerCase();
+    const name = service.name ? service.name.toLowerCase() : '';
     if (name.includes('доставк')) return '🚚';
     if (name.includes('этикетк') || name.includes('бирк')) return '🏷️';
     if (name.includes('час')) return '⏰';
@@ -205,23 +207,28 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Показываем индикатор загрузки
     showLoadingIndicator();
     
-    // Загружаем данные
-    const success = await loadServicesData();
-    console.log('Данные загружены успешно:', success, 'Данные:', servicesData);
-    
-    if (success && servicesData.length > 0) {
-        // Создаем фильтры и рендерим услуги
-        createFilters();
-        renderFilteredServices();
+    try {
+        // Загружаем данные
+        const success = await loadServicesData();
+        console.log('Данные загружены успешно:', success, 'Данные:', servicesData);
         
-        // Обновляем отображение корзины после загрузки данных
-        updateOrderDisplay();
-        
-        console.log('Услуги отрендерены, корзина восстановлена');
-    } else {
-        // Показываем сообщение об ошибке
+        if (success && servicesData && servicesData.length > 0) {
+            // Создаем фильтры и рендерим услуги
+            createFilters();
+            renderFilteredServices();
+            
+            // Обновляем отображение корзины после загрузки данных
+            updateOrderDisplay();
+            
+            console.log('Услуги отрендерены, корзина восстановлена');
+        } else {
+            // Показываем сообщение об ошибке
+            showErrorMessage();
+            console.error('Не удалось загрузить данные или данные пустые');
+        }
+    } catch (error) {
+        console.error('Ошибка при инициализации:', error);
         showErrorMessage();
-        console.error('Не удалось загрузить данные или данные пустые');
     }
     
     // Добавляем обработчики для комбо-наборов
@@ -236,13 +243,30 @@ document.addEventListener('DOMContentLoaded', async function() {
     const orderForm = document.getElementById('customer-form');
     if (orderForm) {
         orderForm.addEventListener('submit', function(e) {
-            if (!validateComboSelection()) {
-                e.preventDefault();
-                return false;
+            e.preventDefault();
+            
+            // Проверяем, что данные загружены
+            if (!servicesData || servicesData.length === 0) {
+                showNotification('Данные услуг еще не загружены. Пожалуйста, подождите.', 'error');
+                return;
             }
-            alert('Заказ успешно оформлен! С вами свяжутся для подтверждения.');
-            this.reset();
-            resetOrder();
+            
+            // Проверяем, есть ли выбранные услуги
+            if (selectedServices.length === 0) {
+                showNotification('Пожалуйста, выберите хотя бы одну услугу для оформления заказа.', 'error');
+                return;
+            }
+            
+            // Проверяем комбо-набор с возможностью продолжить
+            validateComboSelectionWithConfirmation().then(shouldProceed => {
+                if (shouldProceed) {
+                    // Продолжаем отправку формы
+                    submitOrderForm();
+                } else {
+                    // Пользователь решил не продолжать
+                    console.log('Отправка отменена пользователем');
+                }
+            });
         });
     }
     
@@ -264,6 +288,7 @@ let currentFilters = {
 
 // Функция для извлечения числовой цены из строки
 function extractPrice(priceString) {
+    if (!priceString) return 0;
     const priceMatch = priceString.match(/(\d+[\s\d]*)/);
     return priceMatch ? parseInt(priceMatch[0].replace(/\s/g, '')) : 0;
 }
@@ -285,20 +310,32 @@ function applyFilters() {
 
 // Функция для фильтрации услуг
 function filterServices() {
+    // Проверяем, что servicesData загружена
+    if (!servicesData || servicesData.length === 0) {
+        console.warn('servicesData не загружена');
+        return [];
+    }
+    
     let filteredData = JSON.parse(JSON.stringify(servicesData)); // Глубокая копия
     
     // Фильтрация по категории
     if (currentFilters.category !== 'all') {
         filteredData = filteredData.filter(section => 
-            section.section === currentFilters.category
+            section && section.section === currentFilters.category
         );
     }
     
     // Фильтрация по цене и сортировка внутри каждой секции
     filteredData.forEach(section => {
+        if (!section.services) {
+            section.services = [];
+            return;
+        }
+        
         // Фильтрация услуг по цене
         if (currentFilters.price !== 'all') {
             section.services = section.services.filter(service => {
+                if (!service) return false;
                 const price = extractPrice(service.price);
                 
                 switch (currentFilters.price) {
@@ -320,20 +357,21 @@ function filterServices() {
         
         // Сортировка услуг
         section.services.sort((a, b) => {
+            if (!a || !b) return 0;
             const priceA = extractPrice(a.price);
             const priceB = extractPrice(b.price);
             
             switch (currentFilters.sort) {
                 case 'name':
-                    return a.name.localeCompare(b.name, 'ru');
+                    return (a.name || '').localeCompare(b.name || '', 'ru');
                 case 'name-desc':
-                    return b.name.localeCompare(a.name, 'ru');
+                    return (b.name || '').localeCompare(a.name || '', 'ru');
                 case 'price':
                     return priceA - priceB;
                 case 'price-desc':
                     return priceB - priceA;
                 default:
-                    return a.name.localeCompare(b.name, 'ru');
+                    return (a.name || '').localeCompare(b.name || '', 'ru');
             }
         });
     });
@@ -343,6 +381,11 @@ function filterServices() {
 
 // Функция для создания карточки услуги
 function createServiceCard(service) {
+    if (!service) {
+        console.error('Неверные данные услуги:', service);
+        return '';
+    }
+    
     // Получаем эмодзи для услуги
     const serviceEmoji = getServiceEmoji(service);
     
@@ -351,14 +394,14 @@ function createServiceCard(service) {
     const selectedClass = isSelected ? 'selected' : '';
     
     return `
-        <div class="service-card ${selectedClass}" data-service="${service.id}" data-category="${service.section}">
+        <div class="service-card ${selectedClass}" data-service="${service.id}" data-category="${service.section || ''}">
             <div class="service-image">
                 ${serviceEmoji}
             </div>
             <div class="service-info">
-                <h3>${service.name}</h3>
-                <p>${service.description}</p>
-                <p class="price">${service.price}</p>
+                <h3>${service.name || 'Без названия'}</h3>
+                <p>${service.description || ''}</p>
+                <p class="price">${service.price || 'Цена не указана'}</p>
                 <button class="add-to-order" onclick="addToOrder('${service.id}')">${isSelected ? 'Добавлено' : 'Добавить'}</button>
             </div>
         </div>
@@ -367,7 +410,7 @@ function createServiceCard(service) {
 
 // Функция для создания секции с услугами
 function createServiceSection(sectionData) {
-    if (sectionData.services.length === 0) {
+    if (!sectionData || !sectionData.services || sectionData.services.length === 0) {
         return ''; // Не показываем секции без услуг
     }
     
@@ -403,7 +446,7 @@ function renderFilteredServices() {
     
     let hasResults = false;
     const allSectionsHTML = filteredData.map(sectionData => {
-        if (sectionData.services.length > 0) {
+        if (sectionData && sectionData.services && sectionData.services.length > 0) {
             hasResults = true;
             return createServiceSection(sectionData);
         }
@@ -474,10 +517,134 @@ function getComboName(comboType) {
     return comboNames[comboType] || comboType;
 }
 
+// Функция для проверки комбо с подтверждением
+function validateComboSelectionWithConfirmation() {
+    return new Promise((resolve) => {
+        const validationResult = validateComboSelection();
+        
+        if (validationResult.isValid) {
+            // Если комбо валидно, сразу продолжаем
+            resolve(true);
+            return;
+        }
+        
+        // Если комбо невалидно, показываем диалог подтверждения
+        showComboConfirmationDialog(validationResult.message, validationResult.missingItems)
+            .then(userChoice => {
+                resolve(userChoice === 'continue');
+            });
+    });
+}
+
+// Функция для показа диалога подтверждения
+function showComboConfirmationDialog(warningMessage, missingItems) {
+    return new Promise((resolve) => {
+        // Создаем модальное окно
+        const modal = document.createElement('div');
+        modal.className = 'combo-confirmation-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            font-family: Arial, sans-serif;
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+        `;
+        
+        let messageHTML = `
+            <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
+            <h3 style="color: #e67e22; margin-bottom: 15px;">Внимание!</h3>
+            <p style="margin-bottom: 20px; line-height: 1.5;">${warningMessage}</p>
+        `;
+        
+        if (missingItems && missingItems.length > 0) {
+            messageHTML += `
+                <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin: 15px 0;">
+                    <strong>Отсутствующие услуги:</strong>
+                    <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                        ${missingItems.map(item => `<li>${item}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        messageHTML += `
+            <p style="margin: 20px 0; color: #666;">
+                Вы можете вернуться и добавить недостающие услуги или продолжить оформление текущего заказа.
+            </p>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
+                <button id="combo-go-back" style="
+                    padding: 12px 25px;
+                    background: #95a5a6;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    flex: 1;
+                ">Вернуться</button>
+                <button id="combo-continue" style="
+                    padding: 12px 25px;
+                    background: #e74c3c;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    flex: 1;
+                ">Продолжить</button>
+            </div>
+        `;
+        
+        modalContent.innerHTML = messageHTML;
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // Обработчики для кнопок
+        document.getElementById('combo-go-back').addEventListener('click', function() {
+            document.body.removeChild(modal);
+            resolve('go-back');
+        });
+        
+        document.getElementById('combo-continue').addEventListener('click', function() {
+            document.body.removeChild(modal);
+            resolve('continue');
+        });
+        
+        // Закрытие по клику на фон
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+                resolve('go-back');
+            }
+        });
+    });
+}
+
+// Обновленная функция проверки комбо
 function validateComboSelection() {
     if (selectedServices.length === 0) {
-        showNotification('Пожалуйста, выберите хотя бы одну услугу для оформления заказа.', 'error');
-        return false;
+        return {
+            isValid: false,
+            message: 'Пожалуйста, выберите хотя бы одну услугу для оформления заказа.',
+            missingItems: []
+        };
     }
     
     const comboDefinitions = {
@@ -503,40 +670,78 @@ function validateComboSelection() {
         }
     }
     
-    // Если заказ не соответствует ни одному комбо, проверяем частичные совпадения
-    if (!isValidCombo) {
-        let bestMatch = null;
-        let bestMatchMissing = [];
+    if (isValidCombo) {
+        return {
+            isValid: true,
+            message: `Заказ соответствует комбо-набору "${getComboName(matchedCombo)}"`,
+            missingItems: []
+        };
+    }
+    
+    // Если заказ не соответствует ни одному комбо, ищем наиболее подходящий
+    let bestMatch = null;
+    let bestMatchMissing = [];
+    let bestMatchExtra = [];
+    
+    for (const [comboName, requiredKeywords] of Object.entries(comboDefinitions)) {
+        const missing = requiredKeywords.filter(keyword => !selectedKeywords.includes(keyword));
+        const extra = selectedKeywords.filter(keyword => !requiredKeywords.includes(keyword));
         
-        for (const [comboName, requiredKeywords] of Object.entries(comboDefinitions)) {
-            const missing = requiredKeywords.filter(keyword => !selectedKeywords.includes(keyword));
-            const extra = selectedKeywords.filter(keyword => !requiredKeywords.includes(keyword));
-            
-            // Ищем наиболее подходящий комбо (с наименьшим количеством недостающих услуг)
-            if (bestMatch === null || missing.length < bestMatchMissing.length) {
-                bestMatch = comboName;
-                bestMatchMissing = missing;
-            }
+        // Ищем наиболее подходящий комбо (с наименьшим количеством недостающих услуг)
+        if (bestMatch === null || missing.length < bestMatchMissing.length) {
+            bestMatch = comboName;
+            bestMatchMissing = missing;
+            bestMatchExtra = extra;
         }
+    }
+    
+    if (bestMatchMissing.length > 0 || bestMatchExtra.length > 0) {
+        const missingItems = bestMatchMissing.map(keyword => {
+            // Безопасный поиск услуги - проверяем что servicesData загружена
+            let serviceName = keyword;
+            if (servicesData && servicesData.length > 0) {
+                const service = servicesData.flatMap(section => section.services || []).find(s => s && s.id === keyword);
+                if (service && service.name) {
+                    serviceName = service.name;
+                }
+            }
+            return serviceName;
+        });
+        
+        const extraItems = bestMatchExtra.map(keyword => {
+            // Безопасный поиск услуги
+            let serviceName = keyword;
+            if (servicesData && servicesData.length > 0) {
+                const service = servicesData.flatMap(section => section.services || []).find(s => s && s.id === keyword);
+                if (service && service.name) {
+                    serviceName = service.name;
+                }
+            }
+            return serviceName;
+        });
+        
+        let message = `Выбранные услуги не образуют полный комбо-набор. `;
         
         if (bestMatchMissing.length > 0) {
-            const missingItems = bestMatchMissing.map(keyword => {
-                const service = servicesData.flatMap(section => section.services).find(s => s.id === keyword);
-                return service ? service.name : keyword;
-            });
-            
-            const message = `Для завершения набора "${getComboName(bestMatch)}" добавьте: ${missingItems.join(', ')}`;
-            showNotification(message, 'warning');
-            return false;
+            message += `Для завершения набора "${getComboName(bestMatch)}" необходимо добавить: ${missingItems.join(', ')}. `;
         }
+        
+        if (bestMatchExtra.length > 0) {
+            message += `В заказе присутствуют лишние услуги: ${extraItems.join(', ')}.`;
+        }
+        
+        return {
+            isValid: false,
+            message: message.trim(),
+            missingItems: missingItems
+        };
     }
     
-    if (!isValidCombo) {
-        showNotification('Выбранные услуги не образуют полный набор. Пожалуйста, выберите один из готовых комбо-наборов.', 'error');
-        return false;
-    }
-    
-    return true;
+    return {
+        isValid: false,
+        message: 'Выбранные услуги не образуют полный комбо-набор. Пожалуйста, выберите один из готовых комбо-наборов или добавьте недостающие услуги.',
+        missingItems: []
+    };
 }
 
 function showNotification(message, type = 'error') {
@@ -725,7 +930,14 @@ function filterByKind() {
 }
 
 function addToOrder(serviceId) {
-    const service = servicesData.flatMap(section => section.services).find(s => s.id === serviceId);
+    // Проверяем, что servicesData загружена
+    if (!servicesData || servicesData.length === 0) {
+        console.error('Данные услуг не загружены');
+        showNotification('Ошибка: данные услуг не загружены', 'error');
+        return;
+    }
+    
+    const service = servicesData.flatMap(section => section.services || []).find(s => s && s.id === serviceId);
     
     if (!service) {
         console.error('Услуга не найдена:', serviceId);
@@ -871,23 +1083,14 @@ function resetOrder() {
     updateOrderDisplay();
 }
 
-
-// ============================ Форма отправки
-document.getElementById('customer-form').addEventListener('submit', function(e) {
-    e.preventDefault(); // Предотвращаем стандартную отправку
-    
-    // Проверяем, есть ли выбранные услуги
-    if (selectedServices.length === 0) {
-        showNotification('Пожалуйста, выберите хотя бы одну услугу', 'error');
-        return;
-    }
-    
-    // Получаем метод и URL из формы
-    const formMethod = this.method.toUpperCase();
-    const formAction = this.action;
+// Функция для отправки формы заказа
+function submitOrderForm() {
+    const form = document.getElementById('customer-form');
+    const formMethod = form.method.toUpperCase();
+    const formAction = form.action;
     
     // Собираем данные формы
-    const formData = new FormData(this);
+    const formData = new FormData(form);
     
     // Добавляем информацию о выбранных услугах
     selectedServices.forEach((service, index) => {
@@ -903,82 +1106,89 @@ document.getElementById('customer-form').addEventListener('submit', function(e) 
     formData.append('total_services', selectedServices.length);
     formData.append('total_price', calculateTotalPrice());
     
-    // Отправляем данные
-    submitFormDataJSON(formData, formMethod, formAction);
-});
-
-// Альтернативный вариант: отправка в формате JSON
-function submitFormDataJSON(formData, method, action) {
-    // Преобразуем FormData в объект
-    const formObject = {};
-    formData.forEach((value, key) => {
-        // Если ключ уже существует, преобразуем в массив
-        if (formObject[key]) {
-            if (!Array.isArray(formObject[key])) {
-                formObject[key] = [formObject[key]];
-            }
-            formObject[key].push(value);
-        } else {
-            formObject[key] = value;
-        }
-    });
-    
-    // Добавляем информацию об услугах в удобном формате
-    formObject.services = selectedServices.map(service => ({
-        id: service.id,
-        name: service.name,
-        price: service.price,
-        description: service.description || ''
-    }));
-    
     // Показываем индикатор загрузки
     const submitButton = document.querySelector('.submit-order');
     const originalText = submitButton.textContent;
     submitButton.textContent = 'Отправка...';
     submitButton.disabled = true;
     
-    // JSON можно отправлять только методами, которые поддерживают тело запроса
-    const methodsWithBody = ['POST', 'PUT', 'PATCH'];
-    
-    if (!methodsWithBody.includes(method)) {
-        showNotification('Неподдерживаемый метод для JSON отправки', 'error');
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
-        return;
-    }
-    
     // Отправляем как JSON
-    fetch(action, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formObject)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Ошибка сети');
-        }
-        return response.json();
-    })
-    .then(data => {
-        showNotification('Заказ успешно отправлен!', 'success');
-        console.log('Ответ сервера:', data);
+    submitFormDataJSON(formData, formMethod, formAction)
+        .then(success => {
+            if (success) {
+                // Очищаем корзину после успешной отправки
+                resetOrder();
+            }
+        })
+        .finally(() => {
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        });
+}
+
+// Обновленная функция отправки JSON
+function submitFormDataJSON(formData, method, action) {
+    return new Promise((resolve) => {
+        // Преобразуем FormData в объект
+        const formObject = {};
+        formData.forEach((value, key) => {
+            // Если ключ уже существует, преобразуем в массив
+            if (formObject[key]) {
+                if (!Array.isArray(formObject[key])) {
+                    formObject[key] = [formObject[key]];
+                }
+                formObject[key].push(value);
+            } else {
+                formObject[key] = value;
+            }
+        });
         
-        // Очищаем корзину после успешной отправки
-        resetOrder();
-    })
-    .catch(error => {
-        console.error('Ошибка:', error);
-        showNotification('Произошла ошибка при отправке заказа', 'error');
-    })
-    .finally(() => {
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
+        // Добавляем информацию об услугах в удобном формате
+        formObject.services = selectedServices.map(service => ({
+            id: service.id,
+            name: service.name,
+            price: service.price,
+            description: service.description || ''
+        }));
+        
+        // JSON можно отправлять только методами, которые поддерживают тело запроса
+        const methodsWithBody = ['POST', 'PUT', 'PATCH'];
+        
+        if (!methodsWithBody.includes(method)) {
+            showNotification('Неподдерживаемый метод для JSON отправки', 'error');
+            resolve(false);
+            return;
+        }
+        
+        // Отправляем как JSON
+        fetch(action, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formObject)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Ошибка сети');
+            }
+            return response.json();
+        })
+        .then(data => {
+            showNotification('Заказ успешно отправлен!', 'success');
+            console.log('Ответ сервера:', data);
+            resolve(true);
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showNotification('Произошла ошибка при отправке заказа', 'error');
+            resolve(false);
+        });
     });
 }
 
-// Функция для расчета общей стоимости (должна быть у вас уже в коде)
+// Функция для расчета общей стоимости
 function calculateTotalPrice() {
-    return document.getElementById('total-price').textContent;
+    const totalPriceElement = document.getElementById('total-price');
+    return totalPriceElement ? totalPriceElement.textContent : '0';
 }
