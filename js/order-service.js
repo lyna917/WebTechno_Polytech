@@ -731,7 +731,6 @@ function updateOrderDisplay() {
     for (const category in servicesByCategory) {
         orderHTML += `
             <div class="order-category">
-                <h4>${getCategoryName(category)}</h4>
         `;
         
         servicesByCategory[category].forEach(service => {
@@ -800,4 +799,113 @@ function resetOrder() {
     });
     
     updateOrderDisplay();
+}
+
+
+// ============================ Форма отправки
+document.getElementById('customer-form').addEventListener('submit', function(e) {
+    e.preventDefault(); // Предотвращаем стандартную отправку
+    
+    // Проверяем, есть ли выбранные услуги
+    if (selectedServices.length === 0) {
+        showNotification('Пожалуйста, выберите хотя бы одну услугу', 'error');
+        return;
+    }
+    
+    // Получаем метод и URL из формы
+    const formMethod = this.method.toUpperCase();
+    const formAction = this.action;
+    
+    // Собираем данные формы
+    const formData = new FormData(this);
+    
+    // Добавляем информацию о выбранных услугах
+    selectedServices.forEach((service, index) => {
+        formData.append(`service_${index}_id`, service.id);
+        formData.append(`service_${index}_name`, service.name);
+        formData.append(`service_${index}_price`, service.price);
+        if (service.description) {
+            formData.append(`service_${index}_description`, service.description);
+        }
+    });
+    
+    // Добавляем общее количество услуг и общую стоимость
+    formData.append('total_services', selectedServices.length);
+    formData.append('total_price', calculateTotalPrice());
+    
+    // Отправляем данные
+    submitFormDataJSON(formData, formMethod, formAction);
+});
+
+// Альтернативный вариант: отправка в формате JSON
+function submitFormDataJSON(formData, method, action) {
+    // Преобразуем FormData в объект
+    const formObject = {};
+    formData.forEach((value, key) => {
+        // Если ключ уже существует, преобразуем в массив
+        if (formObject[key]) {
+            if (!Array.isArray(formObject[key])) {
+                formObject[key] = [formObject[key]];
+            }
+            formObject[key].push(value);
+        } else {
+            formObject[key] = value;
+        }
+    });
+    
+    // Добавляем информацию об услугах в удобном формате
+    formObject.services = selectedServices.map(service => ({
+        id: service.id,
+        name: service.name,
+        price: service.price,
+        description: service.description || ''
+    }));
+    
+    // Показываем индикатор загрузки
+    const submitButton = document.querySelector('.submit-order');
+    const originalText = submitButton.textContent;
+    submitButton.textContent = 'Отправка...';
+    submitButton.disabled = true;
+    
+    // JSON можно отправлять только методами, которые поддерживают тело запроса
+    const methodsWithBody = ['POST', 'PUT', 'PATCH'];
+    
+    if (!methodsWithBody.includes(method)) {
+        showNotification('Неподдерживаемый метод для JSON отправки', 'error');
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+        return;
+    }
+    
+    // Отправляем как JSON
+    fetch(action, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formObject)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Ошибка сети');
+        }
+        return response.json();
+    })
+    .then(data => {
+        showNotification('Заказ успешно отправлен!', 'success');
+        console.log('Ответ сервера:', data);
+        resetOrder();
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        showNotification('Произошла ошибка при отправке заказа', 'error');
+    })
+    .finally(() => {
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+    });
+}
+// Функция для расчета общей стоимости (должна быть у вас уже в коде)
+function calculateTotalPrice() {
+    return document.getElementById('total-price').textContent;
 }
