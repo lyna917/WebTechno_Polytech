@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initEventHandlers();
 });
 
-// API URL - замените на ваш реальный endpoint
+// API URL
 const API_BASE_URL = 'https://api-3imo.onrender.com';
 
 // Текущий редактируемый/удаляемый заказ
@@ -179,63 +179,95 @@ async function fetchOrderServices(orderId) {
 // Отображение деталей заказа
 async function displayOrderDetails(order) {
     const content = document.getElementById('order-details-content');
-    const orderDate = new Date(order.order_date).toLocaleString('ru-RU');
+    
+    console.log('Полные данные заказа:', order); // Для отладки
+    
+    // Форматируем дату
+    const orderDate = order.order_date ? new Date(order.order_date).toLocaleString('ru-RU') : 'Не указана';
+    
+    // Форматируем время доставки
     const deliveryTime = order.delivery_time === 'asap' 
         ? 'Как можно скорее (с 7:00 до 23:00)' 
-        : order.delivery_time;
+        : (order.delivery_time || 'Не указано');
     
-    // Получаем детальную информацию об услугах
-    let servicesHTML = '';
+    // Создаем HTML для отображения
+    let html = `
+        <div class="order-info-section">
+            <h4>Основная информация о заказе #${order.id}</h4>
+            <div class="order-info-grid">
+    `;
+    
+    // Добавляем все поля заказа
+    const fields = [
+        { key: 'order_date', label: 'Дата оформления', value: orderDate },
+        { key: 'status', label: 'Статус', value: order.status || 'Не указан' },
+        { key: 'total_price', label: 'Общая стоимость', value: order.total_price || 'Не указана' },
+        { key: 'total_services', label: 'Количество услуг', value: order.total_services || '0' },
+        { key: 'customer_name', label: 'Имя клиента', value: order.customer_name || 'Не указано' },
+        { key: 'customer_email', label: 'Email', value: order.customer_email || 'Не указан' },
+        { key: 'customer_phone', label: 'Телефон', value: order.customer_phone || 'Не указан' },
+        { key: 'customer_address', label: 'Адрес', value: order.customer_address || 'Не указан' },
+        { key: 'delivery_time', label: 'Время доставки', value: deliveryTime },
+        { key: 'comments', label: 'Комментарий', value: order.comments || 'Нет комментария' },
+        { key: 'service_names', label: 'Услуги', value: order.service_names || 'Не указаны' }
+    ];
+    
+    fields.forEach(field => {
+        html += `
+            <div class="order-info-item">
+                <strong>${field.label}:</strong> ${field.value}
+            </div>
+        `;
+    });
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    // Пробуем получить детальную информацию об услугах
     try {
         const services = await fetchOrderServices(order.id);
         if (services && services.length > 0) {
-            servicesHTML = `
-                <div class="service-list">
-                    ${services.map(service => `
-                        <div class="service-item">
-                            <strong>${service.service_name}</strong><br>
-                            <small>Цена: ${service.service_price}</small>
+            html += `
+                <div class="order-info-section">
+                    <h4>Детали услуг</h4>
+                    <div class="service-list">
+            `;
+            
+            services.forEach(service => {
+                html += `
+                    <div class="service-item">
+                        <strong>${service.service_name || 'Без названия'}</strong>
+                        <div class="service-details">
+                            <small>Цена: ${service.service_price || 'Не указана'}</small>
                             ${service.service_description ? `<br><small>Описание: ${service.service_description}</small>` : ''}
                         </div>
-                    `).join('')}
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
                 </div>
             `;
-        } else {
-            servicesHTML = `<div class="order-info-item">${order.service_names || 'Услуги не указаны'}</div>`;
         }
     } catch (error) {
-        console.error('Ошибка загрузки услуг:', error);
-        servicesHTML = `<div class="order-info-item">${order.service_names || 'Услуги не указаны'}</div>`;
+        console.log('Не удалось загрузить детали услуг:', error);
     }
     
-    content.innerHTML = `
+    // Показываем сырые данные для отладки
+    html += `
         <div class="order-info-section">
-            <h4>Дата оформления</h4>
-            <div class="order-info-item">${orderDate}</div>
-        </div>
-        
-        <div class="order-info-section">
-            <h4>Информация о клиенте</h4>
-            <div class="order-info-item"><strong>Имя получателя:</strong> ${order.customer_name}</div>
-            <div class="order-info-item"><strong>Адрес доставки:</strong> ${order.customer_address}</div>
-            <div class="order-info-item"><strong>Время доставки:</strong> ${deliveryTime}</div>
-            <div class="order-info-item"><strong>Телефон:</strong> ${order.customer_phone}</div>
-            <div class="order-info-item"><strong>Email:</strong> ${order.customer_email}</div>
-            <div class="order-info-item"><strong>Комментарий:</strong> ${order.comments || 'Нет комментария'}</div>
-        </div>
-        
-        <div class="order-info-section">
-            <h4>Состав заказа</h4>
-            <div class="order-info-item"><strong>Количество услуг:</strong> ${order.total_services}</div>
-            <div class="order-info-item"><strong>Общая стоимость:</strong> ${order.total_price}</div>
-            ${servicesHTML}
-        </div>
-        
-        <div class="order-info-section">
-            <h4>Статус заказа</h4>
-            <div class="order-info-item"><strong>Статус:</strong> <span class="status-${order.status}">${getStatusText(order.status)}</span></div>
+            <h4>Отладочная информация</h4>
+            <details>
+                <summary>Показать полные данные заказа (JSON)</summary>
+                <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; margin-top: 10px; font-size: 12px;">${JSON.stringify(order, null, 2)}</pre>
+            </details>
         </div>
     `;
+    
+    content.innerHTML = html;
 }
 
 // Показать форму редактирования заказа
@@ -255,11 +287,11 @@ async function showEditOrderForm(orderId) {
 // Заполнение формы редактирования
 function populateEditForm(order) {
     document.getElementById('edit-order-id').value = order.id;
-    document.getElementById('edit-customer-name').value = order.customer_name;
-    document.getElementById('edit-customer-email').value = order.customer_email;
-    document.getElementById('edit-customer-phone').value = order.customer_phone;
-    document.getElementById('edit-customer-address').value = order.customer_address;
-    document.getElementById('edit-delivery-time').value = order.delivery_time;
+    document.getElementById('edit-customer-name').value = order.customer_name || '';
+    document.getElementById('edit-customer-email').value = order.customer_email || '';
+    document.getElementById('edit-customer-phone').value = order.customer_phone || '';
+    document.getElementById('edit-customer-address').value = order.customer_address || '';
+    document.getElementById('edit-delivery-time').value = order.delivery_time || '';
     document.getElementById('edit-comments').value = order.comments || '';
 }
 
@@ -267,32 +299,32 @@ function populateEditForm(order) {
 async function saveOrderChanges() {
     const orderId = document.getElementById('edit-order-id').value;
     
-    // Получаем полные данные заказа для обновления
-    const order = await fetchOrderById(orderId);
-    
-    const formData = {
-        name: document.getElementById('edit-customer-name').value,
-        email: document.getElementById('edit-customer-email').value,
-        phone: document.getElementById('edit-customer-phone').value,
-        address: document.getElementById('edit-customer-address').value,
-        delivery_time: document.getElementById('edit-delivery-time').value,
-        comments: document.getElementById('edit-comments').value,
-        total_services: order.total_services,
-        total_price: order.total_price
-    };
-    
-    // Добавляем информацию об услугах из исходного заказа
-    if (order.order_details && typeof order.order_details === 'object') {
-        for (let i = 0; i < order.total_services; i++) {
-            const servicePrefix = `service_${i}_`;
-            formData[`${servicePrefix}id`] = order.order_details[`${servicePrefix}id`];
-            formData[`${servicePrefix}name`] = order.order_details[`${servicePrefix}name`];
-            formData[`${servicePrefix}price`] = order.order_details[`${servicePrefix}price`];
-            formData[`${servicePrefix}description`] = order.order_details[`${servicePrefix}description`] || '';
-        }
-    }
-    
     try {
+        // Получаем полные данные заказа для обновления
+        const order = await fetchOrderById(orderId);
+        
+        const formData = {
+            name: document.getElementById('edit-customer-name').value,
+            email: document.getElementById('edit-customer-email').value,
+            phone: document.getElementById('edit-customer-phone').value,
+            address: document.getElementById('edit-customer-address').value,
+            delivery_time: document.getElementById('edit-delivery-time').value,
+            comments: document.getElementById('edit-comments').value,
+            total_services: order.total_services,
+            total_price: order.total_price
+        };
+        
+        // Добавляем информацию об услугах из исходного заказа
+        if (order.order_details && typeof order.order_details === 'object') {
+            for (let i = 0; i < order.total_services; i++) {
+                const servicePrefix = `service_${i}_`;
+                formData[`${servicePrefix}id`] = order.order_details[`${servicePrefix}id`];
+                formData[`${servicePrefix}name`] = order.order_details[`${servicePrefix}name`];
+                formData[`${servicePrefix}price`] = order.order_details[`${servicePrefix}price`];
+                formData[`${servicePrefix}description`] = order.order_details[`${servicePrefix}description`] || '';
+            }
+        }
+        
         await updateOrder(orderId, formData);
         showNotification('Заказ успешно изменён', 'success');
         closeAllModals();
@@ -330,9 +362,9 @@ async function showDeleteConfirmation(orderId) {
         const deleteInfo = document.getElementById('delete-order-info');
         deleteInfo.innerHTML = `
             <strong>Заказ #${order.id}</strong><br>
-            <strong>Клиент:</strong> ${order.customer_name}<br>
-            <strong>Услуги:</strong> ${order.service_names}<br>
-            <strong>Стоимость:</strong> ${order.total_price}
+            <strong>Клиент:</strong> ${order.customer_name || 'Не указан'}<br>
+            <strong>Услуги:</strong> ${order.service_names || 'Не указаны'}<br>
+            <strong>Стоимость:</strong> ${order.total_price || 'Не указана'}
         `;
         
         document.getElementById('delete-modal-order-id').textContent = orderId;
@@ -345,6 +377,8 @@ async function showDeleteConfirmation(orderId) {
 
 // Подтверждение удаления заказа
 async function confirmDeleteOrder() {
+    if (!currentOrderId) return;
+    
     try {
         await deleteOrder(currentOrderId);
         showNotification('Заказ успешно удалён', 'success');

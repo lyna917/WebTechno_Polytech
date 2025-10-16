@@ -392,3 +392,103 @@
     display: none !important;
   }
 }
+/* Стили для детального просмотра заказа */
+.order-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.service-list {
+    margin: 10px 0;
+}
+
+.service-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+.service-details {
+    margin-top: 5px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.service-details small {
+    color: #888;
+}
+
+/* Стили для отладочной информации */
+details {
+    margin: 10px 0;
+}
+
+summary {
+    cursor: pointer;
+    padding: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+summary:hover {
+    background: #dee2e6;
+}
+/* Стили для детального просмотра заказа */
+.order-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.service-list {
+    margin: 10px 0;
+}
+
+.service-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+.service-details {
+    margin-top: 5px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.service-details small {
+    color: #888;
+}
+
+/* Стили для отладочной информации */
+details {
+    margin: 10px 0;
+}
+
+summary {
+    cursor: pointer;
+    padding: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+summary:hover {
+    background: #dee2e6;
+}
+
+pre {
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin-top: 10px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+}
