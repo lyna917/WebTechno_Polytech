@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // API URL - замените на ваш реальный endpoint
-const API_BASE_URL = 'https://api-3imo.onrender.com'; 
+const API_BASE_URL = 'https://api-3imo.onrender.com';
 
 // Текущий редактируемый/удаляемый заказ
 let currentOrderId = null;
@@ -64,7 +64,6 @@ function createOrderRow(order) {
         ? 'Как можно скорее (с 7:00 до 23:00)' 
         : order.delivery_time;
 
-    
     return `
         <tr data-order-id="${order.id}">
             <td>${order.id}</td>
@@ -87,16 +86,6 @@ function createOrderRow(order) {
             </td>
         </tr>
     `;
-}
-
-// Получение текста статуса
-function getStatusText(status) {
-    const statusMap = {
-        'pending': 'В обработке',
-        'completed': 'Завершен',
-        'cancelled': 'Отменен'
-    };
-    return statusMap[status] || status;
 }
 
 // Инициализация обработчиков событий
@@ -197,20 +186,25 @@ async function displayOrderDetails(order) {
     
     // Получаем детальную информацию об услугах
     let servicesHTML = '';
-    if (order.services && order.services.length > 0) {
-        servicesHTML = `
-            <div class="service-list">
-                ${order.services.map(service => `
-                    <div class="service-item">
-                        <strong>${service.service_name}</strong><br>
-                        <small>Цена: ${service.service_price}</small>
-                        ${service.service_description ? `<br><small>Описание: ${service.service_description}</small>` : ''}
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    } else {
-        // Если нет детальной информации, используем общую
+    try {
+        const services = await fetchOrderServices(order.id);
+        if (services && services.length > 0) {
+            servicesHTML = `
+                <div class="service-list">
+                    ${services.map(service => `
+                        <div class="service-item">
+                            <strong>${service.service_name}</strong><br>
+                            <small>Цена: ${service.service_price}</small>
+                            ${service.service_description ? `<br><small>Описание: ${service.service_description}</small>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            servicesHTML = `<div class="order-info-item">${order.service_names || 'Услуги не указаны'}</div>`;
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки услуг:', error);
         servicesHTML = `<div class="order-info-item">${order.service_names || 'Услуги не указаны'}</div>`;
     }
     
@@ -288,7 +282,7 @@ async function saveOrderChanges() {
     };
     
     // Добавляем информацию об услугах из исходного заказа
-    if (order.order_details) {
+    if (order.order_details && typeof order.order_details === 'object') {
         for (let i = 0; i < order.total_services; i++) {
             const servicePrefix = `service_${i}_`;
             formData[`${servicePrefix}id`] = order.order_details[`${servicePrefix}id`];
@@ -320,7 +314,8 @@ async function updateOrder(orderId, data) {
     });
     
     if (!response.ok) {
-        throw new Error('Ошибка сети');
+        const errorText = await response.text();
+        throw new Error(`Ошибка сети: ${response.status} - ${errorText}`);
     }
     
     return await response.json();
@@ -368,7 +363,8 @@ async function deleteOrder(orderId) {
     });
     
     if (!response.ok) {
-        throw new Error('Ошибка сети');
+        const errorText = await response.text();
+        throw new Error(`Ошибка сети: ${response.status} - ${errorText}`);
     }
     
     return await response.json();
