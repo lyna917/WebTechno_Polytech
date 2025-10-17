@@ -5,157 +5,243 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pinterest enjoyer — Главная</title>
 
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+
 </head>
 <body>
-  <div class="layout-container">
+  <div class="d-flex">
     <!-- Сайдбар -->
-    <aside class="sidebar">
-      <div class="logo">Pinterest enjoyer</div>
-      <nav class="main-nav" aria-label="Главная навигация">
-        <a href="index.html" class="nav-item active">Главная</a>
-        <a href="football.html" class="nav-item">Футбол</a>
-        <a href="boxing.html" class="nav-item">Бокс</a>
-        <a href="#about" class="nav-item">О нас</a>
-        <a href="#gallery" class="nav-item">Галерея</a>
-        <a href="#contact" class="nav-item">Контакты</a>
-        <a href="auth.html" class="nav-item">Вход</a>
-        <a href="order.html" class="nav-item active">Заказ услуг</a>
-        <a href="order_history.html" class="nav-item active">История заказов</a>
-      </nav>
+    <aside class="sidebar d-none d-lg-block">
+      <div class="p-3">
+        <div class="navbar-brand text-white">Pinterest enjoyer</div>
+        <nav class="nav flex-column mt-4" aria-label="Главная навигация">
+          <a href="index.html" class="nav-item-sidebar active">Главная</a>
+          <a href="football.html" class="nav-item-sidebar">Футбол</a>
+          <a href="boxing.html" class="nav-item-sidebar">Бокс</a>
+          <a href="#about" class="nav-item-sidebar">О нас</a>
+          <a href="#gallery" class="nav-item-sidebar">Галерея</a>
+          <a href="#contact" class="nav-item-sidebar">Контакты</a>
+          <a href="auth.html" class="nav-item-sidebar">Вход</a>
+          <a href="order.html" class="nav-item-sidebar">Заказ услуг</a>
+          <a href="order_history.html" class="nav-item-sidebar">История заказов</a>
+        </nav>
+      </div>
     </aside>
     <!-- Основное содержимое -->
-    <main class="main-content">
-      <header class="content-header">
-        <h1>Добро пожаловать в мир красивых изображений</h1>
-      </header>
-
-      <section id="about" class="section hero">
-        <div class="text-content">
-          <h2>Мы публикуем красивые изображения</h2>
-          <p>Небольшой проект, созданный для публикации интересных фотографий из Pinterest. Мы собираем лучшие работы со всего мира.</p>
-        </div>
-        <div class="image-content">
-          <img src="src/Kaká x Van Gogh🖼✨️.jpg" alt="Картина Кака и Ван Гог">
-        </div>
-      </section>
-
-      <section id="gallery" class="section">
-        <h2>Популярные изображения</h2>
-        <div class="gallery-grid">
-          <div class="gallery-item">
-            <img src="src/messi starry night.jpg" alt="Месси в стиле Звёздной ночи">
-            <div class="gallery-caption">Месси в стиле Ван Гога</div>
-          </div>
-          <div class="gallery-item">
-            <img src="src/messiiiii 💙❤️.jpg" alt="Арт с Месси">
-            <div class="gallery-caption">Артистичный Месси</div>
-          </div>
-          <div class="gallery-item">
-            <img src="src/football.jpg" alt="Футбольное искусство">
-            <div class="gallery-caption">Футбольное искусство</div>
-          </div>
-          <div class="gallery-item">
-            <img src="src/boxing.jpg" alt="Боксёрское искусство">
-            <div class="gallery-caption">Боксёрская мощь</div>
+    <main class="main-content flex-grow-1">
+      <!-- Мобильная навигация -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark d-lg-none">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Pinterest enjoyer</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNav">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="mobileNav">
+            <div class="navbar-nav">
+              <a class="nav-link active" href="index.html">Главная</a>
+              <a class="nav-link" href="football.html">Футбол</a>
+              <a class="nav-link" href="boxing.html">Бокс</a>
+              <a class="nav-link" href="#about">О нас</a>
+              <a class="nav-link" href="#gallery">Галерея</a>
+              <a class="nav-link" href="#contact">Контакты</a>
+              <a class="nav-link" href="auth.html">Вход</a>
+              <a class="nav-link" href="order.html">Заказ услуг</a>
+              <a class="nav-link" href="order_history.html">История заказов</a>
+            </div>
           </div>
         </div>
-      </section>
+      </nav>
 
-      <section class="categories-preview">
-        <h2>Наши категории</h2>
-        <div class="categories-grid">
-          <a href="football.html" class="category-card">
-            <img src="src/football2.jpg" alt="Футбол">
-            <h3>Футбол</h3>
-            <p>Лучшие футбольные моменты в художественном стиле</p>
-          </a>
-          <a href="boxing.html" class="category-card">
-            <img src="src/boxing2.png" alt="Бокс">
-            <h3>Бокс</h3>
-            <p>Мощь и грация боксёрских поединков</p>
-          </a>
-        </div>
-      </section>
+      <div class="container-fluid py-4">
+        <!-- Заголовок -->
+        <header class="section-card text-center mb-4">
+          <h1 class="display-5 fw-bold">Добро пожаловать в мир красивых изображений</h1>
+        </header>
 
-      <section id="contact" class="section">
-        <h2>Контакты</h2>
-        <p>Свяжитесь с нами для сотрудничества или поддержки</p>
-
-        <div class="contact-content">
-          <div class="contact-info">
-            <table class="table-contacts" aria-label="Таблица контактов">
-              <thead>
-                <tr>
-                  <th>Тип</th>
-                  <th>Информация</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>   
-                  <td>Адрес</td>
-                  <td>ул. Примерная, д.10, Москва</td>
-                </tr>
-                <tr>
-                  <td>Телефон</td>
-                  <td><a href="tel:+74951234567">+7 (495) 123-45-67</a></td>
-                </tr>
-                <tr>
-                  <td>E-mail</td>
-                  <td><a href="mailto:pinterestenjoyer@mail.ru">pinterestenjoyer@mail.ru</a></td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- О нас -->
+        <section id="about" class="section-card">
+          <div class="row align-items-center hero-content">
+            <div class="col-lg-6">
+              <h2 class="mb-3">Мы публикуем красивые изображения</h2>
+              <p class="lead">Небольшой проект, созданный для публикации интересных фотографий из Pinterest. Мы собираем лучшие работы со всего мира.</p>
+            </div>
+            <div class="col-lg-6">
+              <img src="src/Kaká x Van Gogh🖼✨️.jpg" alt="Картина Кака и Ван Гог" class="img-fluid rounded">
+            </div>
           </div>
+        </section>
 
-          <div class="contact-form">
-            <h3>Форма обратной связи</h3>
-            <form action="https://httpbin.org/post" method="post" enctype="multipart/form-data" class="feedback-form">
-              <div class="form-row">
-                <label>ФИО: <input type="text" name="fio" required></label>
-                <label>Email: <input type="email" name="email" required></label>
-              </div>
-
-              <fieldset>
-                <legend>Откуда узнали о нас:</legend>
-                <div class="radio-group">
-                  <label><input type="radio" name="source" value="друзья" required> От друзей</label>
-                  <label><input type="radio" name="source" value="поиск"> Поиск</label>
-                  <label><input type="radio" name="source" value="соцсети"> Соцсети</label>
+        <!-- Галерея -->
+        <section id="gallery" class="section-card">
+          <h2 class="mb-4">Популярные изображения</h2>
+          <div class="row g-3">
+            <div class="col-md-6 col-lg-3">
+              <div class="gallery-item">
+                <img src="src/messi starry night.jpg" class="card-img-top" alt="Месси в стиле Звёздной ночи">
+                <div class="p-3 text-center">
+                  <p class="mb-0 text-muted">Месси в стиле Ван Гога</p>
                 </div>
-              </fieldset>
-
-              <label>Тип обращения:
-                <select name="type">
-                  <option value="жалоба">Жалоба</option>
-                  <option value="предложение">Предложение</option>
-                </select>
-              </label>
-
-              <label>Сообщение:
-                <textarea name="message" rows="5" required></textarea>
-              </label>
-
-              <label>Вложения: <input type="file" name="file"></label>
-
-              <label class="checkbox-label">
-                <input type="checkbox" name="consent" required> 
-                Даю согласие на обработку персональных данных
-              </label>
-
-              <button type="submit">Отправить</button>
-            </form>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="gallery-item">
+                <img src="src/messiiiii 💙❤️.jpg" class="card-img-top" alt="Арт с Месси">
+                <div class="p-3 text-center">
+                  <p class="mb-0 text-muted">Артистичный Месси</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="gallery-item">
+                <img src="src/football.jpg" class="card-img-top" alt="Футбольное искусство">
+                <div class="p-3 text-center">
+                  <p class="mb-0 text-muted">Футбольное искусство</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="gallery-item">
+                <img src="src/boxing.jpg" class="card-img-top" alt="Боксёрское искусство">
+                <div class="p-3 text-center">
+                  <p class="mb-0 text-muted">Боксёрская мощь</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        <!-- Категории -->
+        <section class="section-card">
+          <h2 class="mb-4">Наши категории</h2>
+          <div class="row g-4">
+            <div class="col-md-6">
+              <a href="football.html" class="category-card">
+                <img src="src/football2.jpg" class="card-img-top" alt="Футбол">
+                <div class="p-3">
+                  <h3>Футбол</h3>
+                  <p class="text-muted">Лучшие футбольные моменты в художественном стиле</p>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-6">
+              <a href="boxing.html" class="category-card">
+                <img src="src/boxing2.png" class="card-img-top" alt="Бокс">
+                <div class="p-3">
+                  <h3>Бокс</h3>
+                  <p class="text-muted">Мощь и грация боксёрских поединков</p>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Контакты -->
+        <section id="contact" class="section-card">
+          <h2 class="mb-3">Контакты</h2>
+          <p class="lead">Свяжитесь с нами для сотрудничества или поддержки</p>
+
+          <div class="row mt-4">
+            <div class="col-lg-4">
+              <div class="contact-info">
+                <table class="table table-bordered table-contacts">
+                  <thead>
+                    <tr>
+                      <th>Тип</th>
+                      <th>Информация</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>   
+                      <td>Адрес</td>
+                      <td>ул. Примерная, д.10, Москва</td>
+                    </tr>
+                    <tr>
+                      <td>Телефон</td>
+                      <td><a href="tel:+74951234567" class="text-decoration-none">+7 (495) 123-45-67</a></td>
+                    </tr>
+                    <tr>
+                      <td>E-mail</td>
+                      <td><a href="mailto:pinterestenjoyer@mail.ru" class="text-decoration-none">pinterestenjoyer@mail.ru</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="col-lg-8">
+              <div class="feedback-form">
+                <h3 class="mb-3">Форма обратной связи</h3>
+                <form action="https://httpbin.org/post" method="post" enctype="multipart/form-data">
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label">ФИО</label>
+                      <input type="text" name="fio" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Email</label>
+                      <input type="email" name="email" class="form-control" required>
+                    </div>
+                  </div>
+
+                  <fieldset class="mb-3">
+                    <legend class="form-label">Откуда узнали о нас:</legend>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="source" value="друзья" id="friends" required>
+                      <label class="form-check-label" for="friends">От друзей</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="source" value="поиск" id="search">
+                      <label class="form-check-label" for="search">Поиск</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="source" value="соцсети" id="social">
+                      <label class="form-check-label" for="social">Соцсети</label>
+                    </div>
+                  </fieldset>
+
+                  <div class="mb-3">
+                    <label class="form-label">Тип обращения</label>
+                    <select name="type" class="form-select">
+                      <option value="жалоба">Жалоба</option>
+                      <option value="предложение">Предложение</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Сообщение</label>
+                    <textarea name="message" rows="5" class="form-control" required></textarea>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Вложения</label>
+                    <input type="file" name="file" class="form-control">
+                  </div>
+
+                  <div class="mb-3 form-check">
+                    <input type="checkbox" name="consent" class="form-check-input" required>
+                    <label class="form-check-label">Даю согласие на обработку персональных данных</label>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 
-  <footer class="main-footer">
-    <div class="container">
-      <p>© 2025 Pinterest enjoyer — Все права защищены</p>
+  <!-- Футер -->
+  <footer class="bg-dark text-white py-3 mt-auto">
+    <div class="container-fluid text-center">
+      <p class="mb-0">© 2025 Pinterest enjoyer — Все права защищены</p>
     </div>
   </footer>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
